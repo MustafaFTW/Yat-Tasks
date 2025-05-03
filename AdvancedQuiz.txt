@@ -1,0 +1,371 @@
+1-
+    6
+    8
+
+2-
+    true
+
+3-
+    1
+    2
+    3
+
+4-
+    no output
+
+5-
+    20
+    null
+
+6-
+    orange  
+
+7-
+    Error ,GetFullName() Is not a Function 
+
+8-
+    true 
+    true 
+    false 
+    true
+
+9-
+    Lydia 21
+    
+
+10-
+    number
+    number new design ,
+
+
+
+// src/components/NearbyPlaces.jsx
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import placesData from '../data/places.json';
+import './nearbyme.css';
+
+const NearbyPlaces = () => {
+  const navigate = useNavigate();
+  const [selectedCategory, setSelectedCategory] = useState('restaurants');
+  const [budget, setBudget] = useState(4); // Default to all prices
+  const [rating, setRating] = useState(3); // Default to 3+ stars
+  const [loading, setLoading] = useState(true);
+  const [places, setPlaces] = useState([]);
+
+  // Category icons with colors for better visibility
+  const categoryIcons = {
+    restaurants: { icon: '🍽️', color: '#FF5722', bg: '#FFF3F0' },
+    cafes: { icon: '☕', color: '#795548', bg: '#F1EBE9' },
+    hotels: { icon: '🏨', color: '#2196F3', bg: '#E3F2FD' },
+    monuments: { icon: '🏛️', color: '#607D8B', bg: '#ECEFF1' }
+  };
+
+  // Simulate fetching data - in a real app, you would make API calls
+  useEffect(() => {
+    setLoading(true);
+    
+    // Simulate API call with setTimeout
+    setTimeout(() => {
+      // Filter places based on category, budget and rating
+      const filteredPlaces = placesData[selectedCategory].filter(place => 
+        place.priceLevel <= budget && place.rating >= rating
+      );
+      
+      setPlaces(filteredPlaces);
+      setLoading(false);
+    }, 500);
+  }, [selectedCategory, budget, rating]);
+
+  const handleGetLocation = (place) => {
+    alert(`Getting directions to ${place.name}`);
+  };
+
+  // Get price range from the data
+  const getPriceRange = (priceLevel) => {
+    return placesData.priceRanges[priceLevel] || 'N/A';
+  };
+
+  const filterSectionStyle = {
+    backgroundColor: '#f8f9fa',
+    padding: '25px',
+    borderRadius: '10px',
+    marginBottom: '30px',
+    boxShadow: '0 2px 10px rgba(0,0,0,0.08)'
+  };
+
+  const filterHeadingStyle = {
+    fontSize: '1.2rem',
+    marginBottom: '15px',
+    color: '#333',
+    fontWeight: '600',
+    borderBottom: '2px solid #e0e0e0',
+    paddingBottom: '8px'
+  };
+
+  return (
+    <div className="nearby-places-page">
+      <header className="nearby-header">
+        <h1>Find Places Near You</h1>
+        <p>Discover restaurants, cafes, hotels, and monuments in Cairo</p>
+      </header>
+      
+      <div className="filters-section" style={filterSectionStyle}>
+        <div className="category-filter">
+          <h3 style={filterHeadingStyle}>What are you looking for?</h3>
+          <div className="category-buttons" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            {Object.entries(categoryIcons).map(([category, {icon, color, bg}]) => (
+              <button 
+                key={category}
+                className={`category-button ${selectedCategory === category ? 'active' : ''}`}
+                onClick={() => setSelectedCategory(category)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '12px 18px',
+                  backgroundColor: selectedCategory === category ? color : bg,
+                  color: selectedCategory === category ? 'white' : '#333',
+                  border: `1px solid ${selectedCategory === category ? color : '#ddd'}`,
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  fontWeight: '500',
+                  boxShadow: selectedCategory === category ? `0 4px 8px rgba(0,0,0,0.15)` : 'none'
+                }}
+              >
+                <span style={{ fontSize: '24px' }}>
+                  {icon}
+                </span>
+                <span style={{ fontSize: '15px' }}>
+                  {category.charAt(0).toUpperCase() + category.slice(1)}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        <div className="budget-filter" style={{ marginTop: '25px' }}>
+          <h3 style={filterHeadingStyle}>Budget</h3>
+          <div className="budget-options" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            {[1, 2, 3, 4].map(level => (
+              <button
+                key={level}
+                onClick={() => setBudget(level)}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '12px 15px',
+                  backgroundColor: budget === level ? '#1a73e8' : 'white',
+                  color: budget === level ? 'white' : '#333',
+                  border: `1px solid ${budget === level ? '#1a73e8' : '#ddd'}`,
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  minWidth: '110px',
+                  boxShadow: budget === level ? `0 4px 8px rgba(0,0,0,0.15)` : 'none'
+                }}
+              >
+                <span style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '5px' }}>
+                  {'$'.repeat(level)}
+                </span>
+                <span style={{ fontSize: '13px' }}>
+                  {getPriceRange(level)}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        <div className="rating-filter" style={{ marginTop: '25px' }}>
+          <h3 style={filterHeadingStyle}>Minimum Rating</h3>
+          <div className="star-rating" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            {[3, 3.5, 4, 4.5, 5].map(star => (
+              <button 
+                key={star} 
+                onClick={() => setRating(star)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '10px 15px',
+                  backgroundColor: rating === star ? '#1a73e8' : 'white',
+                  color: rating === star ? 'white' : '#333',
+                  border: `1px solid ${rating === star ? '#1a73e8' : '#ddd'}`,
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  boxShadow: rating === star ? `0 4px 8px rgba(0,0,0,0.15)` : 'none'
+                }}
+              >
+                <span style={{ fontSize: '15px', fontWeight: '500' }}>
+                  {star}+
+                </span>
+                <span style={{ 
+                  fontSize: '18px', 
+                  color: rating === star ? 'white' : '#FFC107'
+                }}>
+                  ⭐
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+      
+      <div className="results-section">
+        <h2 className="results-title" style={{
+          fontSize: '1.8rem',
+          margin: '0 0 25px 0',
+          color: '#333',
+          padding: '15px',
+          backgroundColor: '#f5f5f5',
+          borderRadius: '8px',
+          boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
+        }}>
+          {loading ? 'Finding places...' : `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Near You`}
+        </h2>
+        
+        {loading ? (
+          <div className="loading-spinner" style={{ textAlign: 'center', padding: '40px' }}>
+            <div className="spinner" style={{
+              border: '4px solid rgba(0, 0, 0, 0.1)',
+              borderRadius: '50%',
+              borderTop: '4px solid #1a73e8',
+              width: '40px',
+              height: '40px',
+              animation: 'spin 1s linear infinite',
+              margin: '0 auto 15px'
+            }}></div>
+            <p>Searching nearby places...</p>
+          </div>
+        ) : places.length === 0 ? (
+          <div className="no-results" style={{ 
+            textAlign: 'center', 
+            padding: '40px', 
+            backgroundColor: '#f8f9fa',
+            borderRadius: '8px',
+            marginBottom: '20px'
+          }}>
+            <p>No places match your criteria. Try adjusting your filters.</p>
+          </div>
+        ) : (
+          <div className="places-grid" style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gap: '25px'
+          }}>
+            {places.map(place => (
+              <div className="place-card" key={place.id} style={{
+                backgroundColor: 'white',
+                borderRadius: '10px',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                overflow: 'hidden',
+                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                position: 'relative',
+                paddingBottom: '60px',
+                border: '1px solid #eee'
+              }}>
+                <div className="place-image" style={{ height: '180px', overflow: 'hidden' }}>
+                  <img 
+                    src={place.image} 
+                    alt={place.name} 
+                    style={{ 
+                      width: '100%', 
+                      height: '100%',
+                      objectFit: 'cover'
+                    }}
+                  />
+                </div>
+                <div className="place-rating" style={{ 
+                  padding: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px'
+                }}>
+                  <span style={{ color: '#FFC107', fontSize: '18px' }}>⭐</span>
+                  <span style={{ fontWeight: 'bold' }}>{place.rating}</span>
+                  <span style={{ color: '#70757a', fontSize: '14px' }}>({place.reviewCount})</span>
+                </div>
+                <h3 style={{ 
+                  padding: '0 12px', 
+                  margin: '0 0 10px 0',
+                  fontSize: '18px',
+                  fontWeight: '600'
+                }}>{place.name}</h3>
+                <div style={{ padding: '0 12px', marginBottom: '10px' }}>
+                  <span style={{ 
+                    color: '#1a73e8', 
+                    fontWeight: '500'
+                  }}>{getPriceRange(place.priceLevel)}</span>
+                </div>
+                <div style={{ 
+                  padding: '12px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  borderTop: '1px solid #f0f0f0'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <span style={{ fontSize: '16px' }}>📍</span>
+                    <span>{place.distance}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <span style={{ fontSize: '16px' }}>⏱️</span>
+                    <span>{place.openStatus}</span>
+                  </div>
+                </div>
+                <button 
+                  style={{
+                    position: 'absolute',
+                    bottom: '12px',
+                    right: '12px',
+                    backgroundColor: '#1a73e8',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '8px 12px',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+                  }}
+                  onClick={() => handleGetLocation(place)}
+                >
+                  <span>📍</span>
+                  Get Location
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <button 
+        onClick={() => navigate('/')}
+        style={{ 
+          display: 'inline-block',
+          marginTop: '30px',
+          marginBottom: '40px',
+          padding: '12px 24px',
+          backgroundColor: '#1a73e8',
+          border: 'none',
+          borderRadius: '6px',
+          color: 'white',
+          cursor: 'pointer',
+          transition: 'all 0.3s ease',
+          fontWeight: '500',
+          boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+        }}
+      >
+        ← Back to Home
+      </button>
+    </div>
+  );
+};
+
+export default NearbyPlaces; old design
